@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
-// import { loadmoreUser, loadUser, removeUser, resendUser } from "../actions/users";
 import PhonebookItem from "../../components/PhonebookItem"
 
 import {
@@ -8,6 +7,7 @@ import {
     selectUser,
     removeUserAsync,
     addUserAsync,
+    loadmore
 } from './userSlice';
 
 export default function PhonebookList() {
@@ -19,15 +19,14 @@ export default function PhonebookList() {
         dispatch(loadUserAsync())
     }, [dispatch])
 
-    // const scrolling = (event) => {
-    //     var element = event.target;
-    //     if (element.scrollHeight - element.scrollTop === element.clientHeight) {
-    //         dispatch(loadmoreUser())
-    //     }
-    // }
+    const scrolling = (event) => {
+        var element = event.target;
+        if (element.scrollHeight - element.scrollTop === element.clientHeight) {
+            dispatch(loadmore())
+        }
+    }
     return (
-        // <div className="col" onScroll={scrolling} style={{ overflowY: 'scroll', height: 200 }}>
-        <div className="col">
+        <div className="col" onScroll={scrolling} style={{ overflowY: 'scroll', height: 200 }}>
             <table className="table">
                 <thead>
                     <tr>

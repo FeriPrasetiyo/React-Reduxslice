@@ -1,5 +1,10 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { loadUser, addUser, removeUser, updateUser } from './userAPI';
+import axios from 'axios';
+
+const request = axios.create({
+    baseURL: 'http://localhost:3000/'
+});
 
 const initialState = {
     value: {
@@ -58,6 +63,18 @@ export const updateUserAsync = createAsyncThunk(
     }
 );
 
+export const loadmoreUserAsync = createAsyncThunk(
+    'user/loadUser',
+    async () => {
+        try {
+            const response = await loadUser();
+            return { user: response.data.data };
+        } catch (err) {
+            console.log(err)
+        }
+    }
+);
+
 export const userSlice = createSlice({
     name: 'user',
     initialState,
@@ -84,6 +101,26 @@ export const userSlice = createSlice({
                         phone: action.payload.phone,
                         sent: true
                     }]
+            }
+        },
+        loadPage: (state, action) => {
+            state.value = {
+                users: [...state.value.users, ...action.payload.users.map(item => {
+                    item.sent = true
+                    return item
+                })],
+                ...state.value.params,
+                params: action.payload.params
+            }
+        },
+        search: (state, action) => {
+            console.log(action.payload, 'action load')
+            state.value = {
+                users: action.payload.users.map(item => {
+                    item.sent = true
+                    return item
+                }),
+                params: action.payload.params
             }
         },
     },
@@ -160,7 +197,7 @@ export const userSlice = createSlice({
     },
 });
 
-export const { add, edit } = userSlice.actions;
+export const { add, edit, loadPage, search } = userSlice.actions;
 
 export const selectUser = (state) => state.user.value.users
 
@@ -176,6 +213,44 @@ export const update = (name, phone) => (dispatch, getState) => {
     dispatch(updateUserAsync({ id, name, phone }))
 };
 
+export const loadmore = () => async (dispatch, getState) => {
+    const state = getState()
+    try {
+        if (state.user.value.params.page < state.user.value.params.pages) {
+            let params = {
+                ...state.user.value.params,
+                page: Number(state.user.value.params.page + 1)
+            }
+            const { data } = await request.get('users', { params })
+            params = {
+                ...params,
+                pages: data.data[0].pages
+            }
+            dispatch(loadPage({ users: data.data[0].users, params }))
+        }
+    } catch (err) {
+        dispatch(err)
+    }
+};
+
+export const searchUser = (query) => async (dispatch, getSate) => {
+    try {
+        let state = getSate()
+        let params = {
+            ...state.user.value.params,
+            ...query,
+            page: 1
+        }
+        const { data } = await request.get('users', { params })
+        params = {
+            ...params,
+            pages: data.data[0].pages
+        }
+        dispatch(search({ users: data.data[0].users, params }))
+    } catch (err) {
+        console.log(err)
+    }
+}
 
 
 export default userSlice.reducer;

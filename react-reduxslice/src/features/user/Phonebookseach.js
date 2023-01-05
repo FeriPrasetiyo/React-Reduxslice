@@ -4,6 +4,10 @@ import { useDispatch } from 'react-redux'
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 // import { faBan, faCheck } from '@fortawesome/free-solid-svg-icons'
 
+import {
+    searchUser
+} from './userSlice';
+
 export default function PhonebookForm(props) {
     const dispatch = useDispatch()
     const [user, setUser] = useState({
@@ -23,7 +27,7 @@ export default function PhonebookForm(props) {
 
     const handleSubmit = useCallback((event) => {
         event.preventDefault()
-        dispatch(({ name: user.name, phone: user.phone }))
+        dispatch(searchUser({ name: user.name, phone: user.phone }))
         setUser({ name: '', phone: '' })
     }, [dispatch, user])
 
